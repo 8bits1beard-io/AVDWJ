@@ -1,3 +1,6 @@
+<img width="1280" height="640" alt="virtual-date-adventure-banner" src="https://github.com/user-attachments/assets/ab112cd5-508c-450b-9ef4-02542896d646" />
+
+
 # Virtual Date Adventure Game
 
 A retro-styled "choose your own adventure" web game where players go on a virtual first date with Joshua. Experience different dating scenarios through multiple branching paths and see how well you connect based on your choices.
