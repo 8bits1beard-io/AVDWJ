@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Virtual Date with Joshua</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #fff;
+        }
+
+        .game-container {
+            background: rgba(0, 0, 0, 0.85);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 900px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            border: 2px solid #ff00ff;
+            position: relative;
+            overflow: hidden;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(255, 0, 255, 0.5);
+            background: linear-gradient(45deg, #ff00ff, #00ffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .story-text {
+            font-size: 1.2em;
+            line-height: 1.8;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border-left: 4px solid #00ffff;
+        }
+
+        .choices {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .choice-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 15px 25px;
+            border-radius: 10px;
+            color: white;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .choice-btn:hover {
+            transform: translateX(10px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .restart-btn {
+            margin-top: 30px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            color: white;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .restart-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(245, 87, 108, 0.5);
+        }
+
+        .ending {
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+            font-size: 1.3em;
+        }
+
+        .excellent-ending {
+            border: 2px solid #ffd700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+
+        .good-ending {
+            border: 2px solid #00ff00;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+        }
+
+        .neutral-ending {
+            border: 2px solid #ffff00;
+            box-shadow: 0 0 20px rgba(255, 255, 0, 0.3);
+        }
+
+        .bad-ending {
+            border: 2px solid #ff0000;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            font-size: 0.9em;
+            color: rgba(255, 255, 255, 0.6);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>A Virtual Date with Joshua</h1>
+        <div id="story" class="story-text">Loading game...</div>
+        <div id="choices" class="choices"></div>
+        <button id="restart" class="restart-btn hidden" onclick="startGame()">Start Over</button>
+        <div class="footer">
+            Created by Joshua Walderbach | 2025-08-13
+        </div>
+    </div>
+
+    <script>
+        console.log("JavaScript loading...");
+        
+        const gameStory = {
+            start: {
+                text: "You've matched with Joshua on a dating app. His profile caught your eye with mentions of karaoke, retro gaming, and road trips to quirky roadside attractions. You've been chatting for a week, and he's suggested meeting up. Where would you like to suggest for your first date?",
+                choices: [
+                    { text: "A karaoke bar - let's see those power ballads in action!", next: "karaoke" },
+                    { text: "A retro arcade with classic '80s and '90s games", next: "arcade" },
+                    { text: "A fancy seafood restaurant by the lake", next: "seafood" },
+                    { text: "Stargazing at a nearby observatory", next: "stargazing" }
+                ]
+            },
+            
+            // KARAOKE PATH
+            karaoke: {
+                text: "Joshua's eyes absolutely light up when you suggest karaoke. 'Perfect choice!' he says enthusiastically. 'I've been practicing my air guitar solos.' You meet at a cozy karaoke bar called 'Electric Dreams' with private rooms decorated in neon and mirrors. Joshua immediately pulls up the song list on the tablet, clearly in his element. 'I hope you're ready for some serious '80s power ballads,' he grins, scrolling through hundreds of options. What's your approach?",
+                choices: [
+                    { text: "Challenge him to a duet - 'Don't Stop Believin' by Journey", next: "duet_challenge" },
+                    { text: "Let him go first while you get comfortable with some drinks", next: "watch_first" },
+                    { text: "Suggest you both do silly voice impressions during songs", next: "voice_impressions" },
+                    { text: "Order drinks and just watch - you're too nervous to sing", next: "nervous_watching" }
+                ]
+            },
+
+            duet_challenge: {
+                text: "Joshua's face breaks into a huge smile. 'Journey? Now you're speaking my language!' He dramatically cues up the song and hands you a mic. As the iconic piano opening plays, you both start swaying. Joshua's actually got a great voice, and he's not shy about the theatrical gestures - pointing to the ceiling during 'just a small town girl,' air-guitaring during the instrumental. You're both laughing between verses, and by the guitar solo, you're both completely lost in the performance.",
+                choices: [
+                    { text: "Suggest doing 'Total Eclipse of the Heart' next - go full dramatic", next: "dramatic_escalation" },
+                    { text: "Take a break to chat about your favorite power ballads", next: "music_bonding" },
+                    { text: "Challenge him to see who can hit the highest note in 'Alone' by Heart", next: "vocal_competition" },
+                    { text: "Move closer during the romantic parts of the next song", next: "romantic_moment" }
+                ]
+            },
+
+            dramatic_escalation: {
+                text: "Joshua's eyes widen with glee. 'You want to go FULL Bonnie Tyler? I respect that!' He dims the lights and cues up the song. What follows is the most ridiculous, over-the-top performance you've ever seen. Joshua is on his knees for 'turn around,' does dramatic hair flips, and even uses the disco ball light as a spotlight. You match his energy, belting out every 'bright eyes' with full commitment. By the end, you're both sweating and laughing so hard you can barely breathe. 'That,' Joshua says, wiping tears from his eyes, 'was LEGENDARY.'",
+                choices: [
+                    { text: "Declare this the best first date ever", next: "perfect_connection" },
+                    { text: "Suggest making this a weekly tradition", next: "relationship_planning" },
+                    { text: "Try to one-up it with an even MORE dramatic song", next: "escalation_continues" }
+                ]
+            },
+
+            music_bonding: {
+                text: "Over drinks, you discover Joshua's deep knowledge of '80s music goes way beyond karaoke. He tells you about seeing Def Leppard in concert, his vinyl collection, and how he learned guitar just to play power ballad solos. 'Music is like... emotional time travel,' he says thoughtfully. 'These songs take me right back to being 16 and thinking I was going to be a rock star.' His passion is genuine and infectious.",
+                ending: "excellent"
+            },
+
+            vocal_competition: {
+                text: "The vocal battle is epic. You both attempt the impossibly high notes in 'Alone,' with Joshua dramatically clutching his chest during the emotional parts. Neither of you actually hits the notes, but the effort is so committed and ridiculous that you're both in tears laughing. 'I think we both lost,' Joshua gasps, 'but also somehow both won?' The competitive spirit mixed with mutual silliness creates perfect chemistry.",
+                ending: "excellent"
+            },
+
+            romantic_moment: {
+                text: "During a slower song, you move closer to Joshua. He notices and smiles, continuing to sing but with softer energy. The moment is sweet but not overwhelming - he's letting you set the pace. When the song ends, he says quietly, 'This is really nice. I wasn't sure if karaoke could be romantic, but... here we are.' The balance of fun and intimacy feels just right.",
+                ending: "excellent"
+            },
+
+            voice_impressions: {
+                text: "Joshua's eyes absolutely light up. 'Oh, you want to play THAT game?' He immediately launches into a spot-on Kermit the Frog impression while cueing up 'Bohemian Rhapsody.' 'Bohemian Rhap-sody by Queen-ie!' he croaks, and you're already crying with laughter. He challenges you to do the next verse in any voice you want. What follows is the most ridiculous four minutes of singing you've ever experienced.",
+                choices: [
+                    { text: "Do your best Batman voice for the rock section", next: "batman_opera" },
+                    { text: "Try to out-ridiculous him with multiple character voices", next: "character_chaos" },
+                    { text: "Suggest a voice-impression battle with different songs", next: "impression_tournament" },
+                    { text: "Break character and just appreciate how funny he is", next: "appreciation_moment" }
+                ]
+            },
+
+            batman_opera: {
+                text: "You lean into the mic and deliver 'So you think you can stone me and spit in my eye?' in the deepest, gravelliest Batman voice you can muster. Joshua immediately loses it, doubling over with laughter, but stays in character as Kermit for the harmony. The combination of Batman and Kermit singing Queen together is so absurd that you both break character multiple times. 'This is insane!' Joshua gasps between laughs. 'We're like the world's weirdest superhero duo!'",
+                choices: [
+                    { text: "Suggest creating your own superhero karaoke personas", next: "superhero_personas" },
+                    { text: "Challenge him to do Christopher Walken singing a love ballad", next: "walken_challenge" },
+                    { text: "Take a selfie mid-performance to capture the ridiculousness", next: "ridiculous_selfie" }
+                ]
+            },
+
+            character_chaos: {
+                text: "You cycle through multiple voices - starting with your best Yoda, transitioning to a valley girl accent, then attempting Darth Vader. Joshua matches your energy, adding his own characters into the mix. Soon you're both doing a full voice-acting performance of Queen with at least six different characters. Other karaoke rooms have definitely stopped to listen to whatever chaos is happening in your room.",
+                ending: "excellent"
+            },
+
+            impression_tournament: {
+                text: "What follows is an increasingly ridiculous tournament of impressions across multiple songs. Joshua's Christopher Walken singing 'My Way' is so good it's almost unsettling. Your Scooby Doo version of 'Every Rose Has Its Thorn' has him gasping for air. By the end, you've both discovered hidden talents and laughed harder than you have in months.",
+                ending: "excellent"
+            },
+
+            superhero_personas: {
+                text: "Joshua's eyes light up with creative excitement. 'Yes! I could be... Captain Karaoke! My superpower is making everyone lose their inhibitions through the power of song!' You spend the next hour creating elaborate backstories for your karaoke superhero alter egos, complete with theme songs and origin stories. 'And our weakness is... slow ballads?' Joshua suggests. 'They make us too emotional to fight crime!' The creativity and collaboration feels natural and fun.",
+                ending: "excellent"
+            },
+
+            walken_challenge: {
+                text: "Joshua immediately switches to a spot-on Christopher Walken impression. 'I... will always... love... you-oo-oo,' he delivers with Walken's distinctive pauses and intensity. It's so unexpected and perfect that you nearly fall off your chair laughing. 'More... cowbell... in this... love song,' he continues, never breaking character. The impression is so good it's almost unsettling, but also hilarious.",
+                ending: "excellent"
+            },
+
+            ridiculous_selfie: {
+                text: "You grab your phone and capture the moment - Joshua mid-Kermit impression, you in full Batman mode, both of you completely committed to the absurdity. 'This is definitely going on my fridge,' Joshua declares, looking at the photo. 'Evidence of the night I met my karaoke soulmate.' The photo becomes an instant shared memory of your perfect ridiculous chemistry.",
+                ending: "excellent"
+            },
+
+            watch_first: {
+                text: "Joshua takes the mic confidently and scrolls through the ballads. 'Alright, let me set the bar embarrassingly high,' he grins, cueing up 'Total Eclipse of the Heart.' What follows is three minutes of pure, unapologetic performance art. He's hitting every dramatic pause, every crescendo, doing the 'turn around, bright eyes' with full theatrical flair while maintaining intense eye contact with his reflection in the mirror.",
+                choices: [
+                    { text: "Give him a standing ovation - that was incredible!", next: "enthusiastic_applause" },
+                    { text: "Jump up and demand an encore performance", next: "encore_demand" },
+                    { text: "Tease him about his dramatic mirror romance", next: "playful_teasing" },
+                    { text: "Finally work up the courage to try a song yourself", next: "courage_building" }
+                ]
+            },
+
+            enthusiastic_applause: {
+                text: "Your standing ovation makes Joshua beam with pride. 'Thank you, thank you!' he says, taking exaggerated bows. 'I'll be here all week!' His genuine joy at your appreciation is endearing. 'Your turn!' he says, offering you the mic with encouraging enthusiasm. The supportive energy he's created makes you feel comfortable to try.",
+                ending: "good"
+            },
+
+            encore_demand: {
+                text: "Joshua laughs and immediately cues up another power ballad. 'If you insist!' This time he goes even bigger with 'Alone' by Heart, complete with dramatic lighting changes and interpretive dance moves. His commitment to the performance and willingness to be completely ridiculous for your entertainment shows a playful confidence that's very attractive.",
+                ending: "excellent"
+            },
+
+            playful_teasing: {
+                text: "'So... you and that mirror seem to have a real connection,' you joke. Joshua grins and strikes another dramatic pose. 'What can I say? The mirror understands my artistic vision!' He's a good sport about the teasing and leans into the joke. 'Plus, it never judges my song choices.' His ability to laugh at himself is charming.",
+                ending: "good"
+            },
+
+            courage_building: {
+                text: "Joshua's performance was so over-the-top that it actually made you feel less nervous about looking silly. 'Okay, I think I can try something now,' you say. Joshua immediately becomes your biggest cheerleader, helping you pick a song and offering encouragement. His supportive energy helps you overcome your initial nerves.",
+                ending: "good"
+            },
+
+            nervous_watching: {
+                text: "Joshua notices your hesitation and doesn't push. 'No pressure at all,' he says genuinely. 'I'm perfectly happy being the entertainment tonight.' He performs several songs, clearly enjoying himself, but you never quite work up the courage to join in. The evening is pleasant, but you feel like you missed out on the full Joshua karaoke experience.",
+                ending: "neutral"
+            },
+
+            // ARCADE PATH
+            arcade: {
+                text: "The retro arcade is exactly Joshua's kind of place. The moment you walk in, you're hit with the sounds of 8-bit music, electronic beeps, and the satisfying click of joysticks. Neon lights reflect off rows of classic cabinets - Street Fighter II, Pac-Man, Galaga, and dozens more. 'This takes me back,' Joshua says, his eyes scanning the games with genuine nostalgia. 'I spent way too many quarters on these as a kid.'",
+                choices: [
+                    { text: "Street Fighter II - time for some friendly competition", next: "street_fighter" },
+                    { text: "Pac-Man - can't go wrong with the classics", next: "pacman_challenge" },
+                    { text: "A co-op game like Contra - teamwork makes the dream work", next: "coop_gaming" },
+                    { text: "The photo booth for some silly pictures first", next: "arcade_photobooth" }
+                ]
+            },
+
+            street_fighter: {
+                text: "Joshua cracks his knuckles playfully. 'Hope you're ready to get destroyed. I mained Ryu back in the day, and muscle memory never dies.' He selects Ryu while encouraging you to pick whoever you want. The first round starts, and he's actually really good - pulling off combos you didn't even know existed - but not in an obnoxious way. He's giving you tips between rounds, genuinely trying to make it fun.",
+                choices: [
+                    { text: "Get competitive and really try to win a round", next: "competitive_gaming" },
+                    { text: "Focus more on trash talk and banter than winning", next: "trash_talk_fun" },
+                    { text: "Ask him to teach you some advanced moves", next: "gaming_lessons" },
+                    { text: "Suggest making it interesting with a friendly wager", next: "gaming_wager" }
+                ]
+            },
+
+            competitive_gaming: {
+                text: "You buckle down and start really focusing on the game. Joshua notices the shift in your energy and grins. 'Oh, okay! I see how it is!' The matches get more intense, but Joshua is clearly delighted by your competitive spirit. When you finally land a perfect combo and beat him in a round, he jumps up and high-fives you. 'YES! That was a perfect Dragon Punch! You've been holding out on me!'",
+                choices: [
+                    { text: "Accept the challenge - you're getting the hang of this", next: "gaming_mastery" },
+                    { text: "Suggest switching to a game where you might have an advantage", next: "game_switching" },
+                    { text: "Celebrate your victory with victory poses", next: "victory_celebration" }
+                ]
+            },
+
+            gaming_mastery: {
+                text: "The final matches are intense but fun. You're actually getting good at this, landing combos and reading Joshua's moves. Even when he wins the overall set, he's more excited about your improvement than his victory. 'Did you see that combo you just pulled off? That was tournament-level stuff!' He insists on taking a photo of the high score screen with both your names. 'This is going on my fridge,' he declares.",
+                ending: "excellent"
+            },
+
+            game_switching: {
+                text: "You suggest switching to Tetris, where you might have better luck. Joshua agrees immediately. 'Fair's fair! Let's see what you've got.' It turns out you're much better at puzzle games, and Joshua is genuinely impressed by your skills. 'Okay, now I'M the one getting schooled!' he laughs. His gracious acceptance of defeat and genuine appreciation for your abilities shows good sportsmanship.",
+                ending: "good"
+            },
+
+            victory_celebration: {
+                text: "You both strike ridiculous victory poses by the Street Fighter cabinet. Joshua suggests increasingly dramatic poses, and soon you're both cracking up at the absurdity. Other arcade patrons are staring, but Joshua doesn't care. 'Champions deserve victory poses!' he declares. His willingness to be silly in public is endearing.",
+                ending: "good"
+            },
+
+            trash_talk_fun: {
+                text: "The trash talk becomes the best part of the game. Joshua delivers lines like 'You fight like a dairy farmer!' in various accents, while you counter with equally ridiculous insults. Soon you're both laughing too hard to play effectively. 'This is way more fun than actually winning,' Joshua admits between laughs.",
+                ending: "excellent"
+            },
+
+            gaming_lessons: {
+                text: "Joshua becomes an enthusiastic teacher, patiently showing you quarter-circle motions and combo timing. 'It's all about rhythm,' he explains, standing behind you to guide your hands on the joystick. His teaching style is encouraging and patient. When you finally pull off your first special move, he cheers louder than you do.",
+                ending: "good"
+            },
+
+            gaming_wager: {
+                text: "Joshua grins at the suggestion. 'Alright, what are the stakes?' You decide that whoever loses has to do their best impression of their character's victory pose in public. The added stakes make the game more exciting, and Joshua's dramatic Ryu poses between rounds have you both cracking up.",
+                ending: "good"
+            },
+
+            pacman_challenge: {
+                text: "Joshua nods approvingly. 'Can't go wrong with the classics.' You take turns, and he's cheering you on during your run, pointing out patterns and ghost behaviors. 'See, Blinky always follows you directly, but Pinky tries to get ahead of you,' he explains. His knowledge is impressive but never condescending. His enthusiasm for the game mechanics is infectious.",
+                choices: [
+                    { text: "Try to beat his high score", next: "high_score_attempt" },
+                    { text: "Ask about his favorite retro games growing up", next: "gaming_nostalgia" },
+                    { text: "Suggest moving to a two-player game", next: "multiplayer_suggestion" },
+                    { text: "Challenge him to play with silly self-imposed rules", next: "silly_rules" }
+                ]
+            },
+
+            high_score_attempt: {
+                text: "You get into the zone, following Joshua's advice about ghost patterns. He's your enthusiastic coach, calling out warnings and celebrating each level completion. When you finally beat his score, he erupts in cheers. 'YES! New champion!' His genuine excitement about your success over his own achievement shows great character.",
+                ending: "excellent"
+            },
+
+            gaming_nostalgia: {
+                text: "Joshua's eyes light up as he shares memories of growing up with these games. 'My dad and I used to play Galaga for hours. He could never beat my high score, but he kept trying.' His stories are warm and genuine, giving you insight into his family relationships and the personal meaning these games hold for him.",
+                ending: "good"
+            },
+
+            multiplayer_suggestion: {
+                text: "Joshua immediately perks up. 'Yes! How about some Gauntlet? Nothing like fighting through dungeons together.' His enthusiasm for cooperative gaming shows he values teamwork and shared experiences. The suggestion leads naturally into more collaborative games.",
+                ending: "good"
+            },
+
+            silly_rules: {
+                text: "You suggest playing Pac-Man while only making right turns. Joshua loves the idea. 'Ooh, or how about playing with our eyes closed for 10 seconds at a time?' Soon you've invented several ridiculous variations, each more absurd than the last. His willingness to embrace silly constraints shows a playful creativity.",
+                ending: "excellent"
+            },
+
+            coop_gaming: {
+                text: "Joshua's face lights up immediately. 'Co-op? Now you're talking! Nothing builds trust faster than taking down alien invaders together.' You both grab controllers for Contra, and he immediately starts explaining the power-up system. He's immediately in sync with you, calling out warnings about incoming enemies and celebrating when you grab power-ups.",
+                choices: [
+                    { text: "High-five and declare yourselves the 'Best Team Ever'", next: "team_bonding" },
+                    { text: "Strategize seriously for the next attempt", next: "tactical_planning" },
+                    { text: "Playfully blame each other for the losses", next: "playful_blame_game" },
+                    { text: "Suggest celebrating when you finally beat the level", next: "victory_planning" }
+                ]
+            },
+
+            team_bonding: {
+                text: "Your enthusiasm makes Joshua grin even wider. 'Best team ever!' he agrees, returning the high-five with gusto. 'We're like the Dynamic Duo of arcade gaming!' You continue playing, and despite the constant deaths, you develop an easy rhythm. He starts calling you his 'battle buddy' and does a little victory dance every time you clear a section.",
+                choices: [
+                    { text: "Suggest celebrating with victory pizza after this", next: "pizza_celebration" },
+                    { text: "Challenge another couple to a versus game", next: "couple_challenge" },
+                    { text: "Take a victory photo by the Contra machine", next: "gaming_photo_op" },
+                    { text: "Move on to an even harder co-op game", next: "gaming_escalation" }
+                ]
+            },
+
+            tactical_planning: {
+                text: "Joshua gets into serious strategy mode, analyzing enemy patterns and discussing optimal power-up distribution. 'Okay, you take the spread gun, I'll handle crowd control with the laser.' His analytical approach to the game shows a methodical side, and his willingness to share strategy rather than hog the best weapons shows he's a true team player.",
+                ending: "good"
+            },
+
+            playful_blame_game: {
+                text: "'That death was totally your fault!' you joke after a particularly spectacular failure. 'MY fault? You ran straight into that guy!' Joshua shoots back, grinning. The playful banter makes the repeated failures fun rather than frustrating. You're both having more fun with the friendly accusations than the actual game.",
+                ending: "good"
+            },
+
+            victory_planning: {
+                text: "Joshua's eyes light up. 'Victory celebration? I like it! When we beat this level, we're doing the most ridiculous victory dance this arcade has ever seen.' Having something to celebrate makes the challenge more exciting, and Joshua's enthusiasm for shared celebration shows he values creating memorable moments.",
+                ending: "good"
+            },
+
+            pizza_celebration: {
+                text: "The pizza place Joshua knows turns out to have amazing food and more arcade games. 'This is my perfect evening,' he says, juggling a slice of pizza and a game controller. 'Good food, good games, good company.' His ability to find joy in simple pleasures and his appreciation for the moment feels genuine and attractive.",
+                ending: "excellent"
+            },
+
+            couple_challenge: {
+                text: "You challenge another couple to a versus match, and Joshua immediately gets into competitive mode - but the friendly kind. He's encouraging you, strategizing with you, and high-fiving every success. When you win, he lifts you up in celebration. The other couple laughs at his enthusiasm. 'You guys are adorable,' they say.",
+                ending: "excellent"
+            },
+
+            gaming_photo_op: {
+                text: "The victory photo by the Contra machine captures both of you mid-cheer, controllers in hand, huge grins on your faces. 'This is definitely going on social media,' Joshua declares. 'Evidence of our arcade supremacy!' His desire to document and share the moment shows he values the memory you're creating together.",
+                ending: "excellent"
+            },
+
+            gaming_escalation: {
+                text: "Moving to an even harder game tests your newly formed partnership. Joshua remains patient and encouraging even when the difficulty ramps up significantly. 'We've got this,' he says after your twentieth death. 'We're just... learning the patterns!' His persistence and positive attitude in the face of challenge is admirable.",
+                ending: "good"
+            },
+
+            arcade_photobooth: {
+                text: "Joshua grins. 'Starting with the important stuff, I like it!' You both squeeze into the tiny photo booth. The first photo is awkward, both of you laughing at how cramped it is. By the third photo, Joshua's making ridiculous faces, and by the fourth, you're both in full silly mode. The strip prints out and you're both laughing at the results.",
+                choices: [
+                    { text: "Suggest doing another strip with 'serious' poses", next: "serious_photos" },
+                    { text: "Write your numbers on each other's photo strips", next: "number_exchange" },
+                    { text: "Head to the games, ice thoroughly broken", next: "games_after_photos" },
+                    { text: "Post one on social media tagging him", next: "social_media_post" }
+                ]
+            },
+
+            serious_photos: {
+                text: "The 'serious' photo attempt is even funnier than the silly ones. Every time you try to look dramatic or sophisticated, one of you breaks and starts laughing, ruining the shot. By the end, you have a strip of photos showing your progressive breakdown into giggles. 'These are perfect,' Joshua says, wiping tears from his eyes.",
+                ending: "excellent"
+            },
+
+            number_exchange: {
+                text: "Exchanging numbers via photo strip feels both romantic and playful. Joshua writes his number with a little doodle of a game controller, while you add yours with a smiley face. 'Now we'll always have proof of how ridiculous we looked on our first date,' he says warmly.",
+                ending: "excellent"
+            },
+
+            games_after_photos: {
+                text: "The photo booth session broke any remaining ice perfectly. You both head to the games with easy chemistry, the earlier silliness having established a comfortable dynamic. Joshua suggests a co-op game, and you work together naturally, the photo booth experience having already established your ability to be silly together.",
+                ending: "good"
+            },
+
+            social_media_post: {
+                text: "Joshua is delighted when you post one of the photos and tag him. 'Our public debut!' he jokes. His immediate like and comment ('Best photo booth partner ever!') shows he's comfortable with public displays of connection and appreciates that you want to share the moment.",
+                ending: "good"
+            },
+
+            // STARGAZING PATH
+            stargazing: {
+                text: "Joshua's response is immediate and enthusiastic. 'I've been wanting to test out my new astrophotography setup! This is perfect!' You meet at dusk at a hill outside town that Joshua clearly knows well. He's brought what looks like a small observatory's worth of equipment - a telescope, a camera with a massive lens, a red flashlight, star charts, and even a blanket with built-in heating elements.",
+                choices: [
+                    { text: "Ask him to teach you about constellations and navigation", next: "constellation_lesson" },
+                    { text: "Share your own knowledge about astronomy", next: "astronomy_discussion" },
+                    { text: "Suggest making it more romantic with some wine", next: "romantic_suggestion" },
+                    { text: "Focus on getting to know him better under the stars", next: "personal_conversation" }
+                ]
+            },
+
+            constellation_lesson: {
+                text: "Joshua becomes an enthusiastic teacher, his passion evident in every gesture. 'Okay, see that bright star there? That's actually Sirius - it's a binary star system about 8.6 light years away.' He adjusts the telescope and shows you Saturn's rings, the Orion Nebula, and explains how ancient sailors used the stars for navigation. His knowledge is impressive but never condescending.",
+                choices: [
+                    { text: "Try astrophotography with his patient guidance", next: "photography_lesson" },
+                    { text: "Ask about his most memorable stargazing experience", next: "stargazing_stories" },
+                    { text: "Share how this moment makes you feel", next: "emotional_sharing" },
+                    { text: "Point out how this shows his passion for learning", next: "passion_appreciation" }
+                ]
+            },
+
+            photography_lesson: {
+                text: "Joshua patiently shows you how to use his camera, explaining ISO, aperture, and shutter speed without being condescending. 'It's all about finding the balance between gathering enough light and not overexposing,' he says, standing close to guide your hands on the camera settings. Your first few shots are blurry star trails, but he's encouraging.",
+                choices: [
+                    { text: "Ask if he'll send you the photos to remember this", next: "photo_sharing" },
+                    { text: "Suggest taking a selfie under the stars together", next: "starlight_selfie" },
+                    { text: "Thank him for being such a patient teacher", next: "gratitude_moment" },
+                    { text: "Move closer to him while watching the stars", next: "intimate_stargazing" }
+                ]
+            },
+
+            stargazing_stories: {
+                text: "Joshua's eyes grow distant with memory. 'My dad first showed me the constellations when I was eight. We'd sit on our back porch in Iowa, and he'd tell me all the myths behind the star patterns.' His voice is warm with nostalgia. 'He passed away a few years ago, but every time I look at Orion, I think of those nights.' The personal sharing creates a deeper connection.",
+                ending: "excellent"
+            },
+
+            emotional_sharing: {
+                text: "Under the vast starry sky, you share how the experience makes you feel - small but connected, awed by the universe's scale. Joshua nods thoughtfully. 'That's exactly it. It puts everything in perspective, doesn't it? Our problems seem smaller when you're looking at light that traveled millions of years to reach us.' The philosophical moment deepens your connection.",
+                ending: "excellent"
+            },
+
+            passion_appreciation: {
+                text: "You comment on how his passion for astronomy shines through his teaching. Joshua smiles warmly. 'You know, most people think it's nerdy or boring. It means a lot that you appreciate it.' His vulnerability in sharing something he cares deeply about, and your acceptance of it, creates a meaningful moment of connection.",
+                ending: "excellent"
+            },
+
+            photo_sharing: {
+                text: "Joshua immediately agrees to send you the photos. 'Of course! I love sharing these shots. Most people just see dots of light, but when you know what you're looking at...' He shows you how to spot details in the images on his camera's screen. His enthusiasm for sharing his passion and including you in it is touching.",
+                ending: "excellent"
+            },
+
+            starlight_selfie: {
+                text: "The selfie attempt under starlight requires some creativity with long exposures and red flashlights. Joshua sets up the shot carefully, and you both hold perfectly still for 30 seconds while the camera captures the stars behind you. 'This is either going to be amazing or we'll both look like ghosts,' he jokes. The result is magical.",
+                ending: "excellent"
+            },
+
+            gratitude_moment: {
+                text: "Your sincere thanks for his patience makes Joshua beam. 'Teaching is actually one of my favorite parts of this hobby. You're a great student - curious but not impatient.' The mutual appreciation and his joy in sharing knowledge creates a warm connection between you.",
+                ending: "good"
+            },
+
+            intimate_stargazing: {
+                text: "As you move closer to Joshua while watching for meteors, he notices and smiles, wrapping part of the heated blanket around you both. 'Better for staying warm,' he says softly. The quiet intimacy under the stars feels natural and comfortable. Neither of you feels the need to fill the silence with conversation.",
+                ending: "excellent"
+            },
+
+            astronomy_discussion: {
+                text: "Joshua's eyes widen with genuine delight when you start discussing the Fermi Paradox and Drake Equation. 'You know about this stuff too? That's amazing!' What follows is an hour of the most engaging conversation you've had in months. You trade facts about exoplanets, debate whether we'll find life on Europa or Enceladus, discuss the implications of recent discoveries.",
+                choices: [
+                    { text: "Suggest making stargazing and science talks a regular thing", next: "intellectual_connection" },
+                    { text: "Get philosophical about humanity's place in the universe", next: "philosophical_depths" },
+                    { text: "Share your theories about interstellar travel", next: "sci_fi_dreams" },
+                    { text: "Take a break from talking to enjoy the meteor shower", next: "peaceful_viewing" }
+                ]
+            },
+
+            intellectual_connection: {
+                text: "Joshua sits up, stars reflecting in his eyes. 'You know what? I've been on a lot of first dates, and most of them involve small talk about jobs and hobbies. But this? Talking about the fundamental questions of existence under a meteor shower?' He grins. 'This is exactly the kind of connection I've been hoping to find.' The intellectual spark is undeniable.",
+                ending: "excellent"
+            },
+
+            philosophical_depths: {
+                text: "The conversation turns to deep questions about consciousness, the nature of time, and humanity's role in the cosmos. Joshua engages thoughtfully with your ideas, building on them and offering new perspectives. 'I love that we can go from telescope settings to the meaning of existence in one conversation,' he says. The intellectual intimacy is profound.",
+                ending: "excellent"
+            },
+
+            sci_fi_dreams: {
+                text: "You both geek out completely over theoretical physics and science fiction possibilities. Joshua shares his thoughts on generation ships, while you discuss the challenges of faster-than-light travel. 'We're definitely both science fiction nerds,' he laughs. 'I have a feeling our movie nights are going to be very specific.' The shared interests create perfect compatibility.",
+                ending: "excellent"
+            },
+
+            peaceful_viewing: {
+                text: "You both lie back on the heated blanket, watching meteors streak across the sky in comfortable silence. It's peaceful and beautiful, and Joshua occasionally points out satellites or particularly bright meteors, but the earlier conversational spark has settled into something more mellow. 'This is nice,' he says quietly. 'Just being present.'",
+                ending: "neutral"
+            },
+
+            romantic_suggestion: {
+                text: "Joshua looks a bit uncomfortable. 'I appreciate the thought, but I'm not really a wine person. Plus, I like to keep my wits about me when I'm operating expensive camera equipment.' He softens a bit. 'But if you want to make it more intimate, we could share some music? I've got a playlist that goes perfectly with stargazing.'",
+                choices: [
+                    { text: "Agree to the playlist idea", next: "music_under_stars" },
+                    { text: "Respect his boundary and focus on the stars", next: "boundary_respect" },
+                    { text: "Suggest hot chocolate instead", next: "hot_chocolate_suggestion" },
+                    { text: "Feel rejected and become distant", next: "rejection_response" }
+                ]
+            },
+
+            music_under_stars: {
+                text: "Joshua connects his phone to a small speaker and soon Pink Floyd's 'Shine On You Crazy Diamond' fills the air. The music perfectly complements the stars. You both relax, occasionally pointing out satellites or making observations. 'This is my kind of romantic,' he says quietly. 'No pressure, no performance, just... being present.'",
+                ending: "good"
+            },
+
+            boundary_respect: {
+                text: "Your understanding about his wine preference makes Joshua visibly relax. 'Thank you for not making it weird,' he says with a smile. 'I know it probably seems uptight, but I just know what works for me.' Your respect for his boundaries without taking it personally shows emotional maturity that he clearly appreciates.",
+                ending: "excellent"
+            },
+
+            hot_chocolate_suggestion: {
+                text: "Joshua's face lights up. 'Hot chocolate? That's perfect!' He produces a thermos from his seemingly endless supply of equipment. 'I came prepared for a long night of stargazing.' The warm drink and his thoughtful preparation make the evening more cozy and comfortable.",
+                ending: "good"
+            },
+
+            rejection_response: {
+                text: "Your mood shifts noticeably when Joshua declines the wine, and he picks up on it immediately. 'Hey, did I say something wrong?' The atmosphere becomes awkward as you struggle to explain why you're upset. The rest of the evening is stilted, both of you trying but failing to recapture the earlier ease.",
+                ending: "bad"
+            },
+
+            personal_conversation: {
+                text: "Under the vast night sky, Joshua opens up about his move from Iowa to Arkansas, his intentionally optimized living space, and his philosophy on relationships. 'I believe in parallel play,' he says. 'Being together but not necessarily intertwined. Does that make sense?' He seems genuinely interested in your thoughts on relationships and life.",
+                choices: [
+                    { text: "Share that you value independence too", next: "independence_match" },
+                    { text: "Ask what led him to that philosophy", next: "philosophy_origins" },
+                    { text: "Admit you prefer more intertwined relationships", next: "different_relationship_styles" },
+                    { text: "Change the subject to lighter topics", next: "topic_change" }
+                ]
+            },
+
+            independence_match: {
+                text: "Joshua's face brightens. 'Really? Most people think I'm weird for that. I just think the best relationships are when two whole people choose to share their lives, not two halves trying to make a whole.' The conversation flows naturally from there about personal space, alone time, and maintaining identity in relationships. You're completely on the same wavelength.",
+                ending: "excellent"
+            },
+
+            philosophy_origins: {
+                text: "Joshua shares thoughtfully about past relationships where he felt suffocated or where he accidentally overwhelmed partners. 'I learned that I'm happiest when I can be fully myself AND be with someone I care about, without those being in conflict.' His self-awareness and growth from past experiences shows emotional maturity.",
+                ending: "excellent"
+            },
+
+            different_relationship_styles: {
+                text: "Joshua nods thoughtfully. 'That's totally valid. Different people need different things.' The conversation continues pleasantly, but there's an unspoken understanding that you might not be compatible long-term. Still, you enjoy the rest of the stargazing, and he offers to send you the photos he took. 'Even if we're not a match, this was a lovely evening.'",
+                ending: "neutral"
+            },
+
+            topic_change: {
+                text: "You steer the conversation toward lighter topics like favorite movies and travel stories. Joshua follows your lead gracefully, but you can sense he was hoping for deeper connection. The evening stays pleasant but surface-level. You part ways having had a nice time, though without the deeper bond that might have developed.",
+                ending: "neutral"
+            },
+
+            // SEAFOOD PATH
+            seafood: {
+                text: "Joshua's expression shifts slightly, and he clears his throat politely. 'I really appreciate the suggestion, but I should mention something - I have a pretty strong aversion to seafood. It's not just preference; the smell alone tends to make me feel sick.' He looks genuinely apologetic but firm. 'I know it sounds weird, but I had a really bad experience with spoiled shrimp as a kid, and my brain just never got over it.'",
+                choices: [
+                    { text: "Apologize sincerely and suggest a great steakhouse instead", next: "steakhouse_redirect" },
+                    { text: "Insist that he should try to get over it - seafood is amazing", next: "boundary_violation" },
+                    { text: "Laugh it off and ask him to pick his favorite restaurant", next: "joshua_chooses" },
+                    { text: "Suggest cooking together at your place instead", next: "cooking_date" }
+                ]
+            },
+
+            steakhouse_redirect: {
+                text: "Joshua visibly relaxes and his smile returns. 'Thank you for understanding. I know it's a weird quirk.' At the upscale steakhouse you suggest, he orders a ribeye and seems much more comfortable. Over dinner, he tells you the full story about the childhood shrimp incident - apparently involving a family vacation and food poisoning that lasted three days.",
+                choices: [
+                    { text: "Share your own weird food quirks to make him feel better", next: "food_quirk_bonding" },
+                    { text: "Ask about his favorite foods and cooking", next: "culinary_interests" },
+                    { text: "Appreciate his directness about boundaries", next: "boundary_respect" },
+                    { text: "Steer toward planning your next culinary adventure", next: "food_adventure_planning" }
+                ]
+            },
+
+            food_quirk_bonding: {
+                text: "You share your own food aversions and weird eating habits, which makes Joshua laugh and relax even more. 'Thank you for making me feel less weird about it,' he says. 'I was worried you'd think I was high-maintenance.' The mutual vulnerability over silly food quirks creates an unexpectedly intimate bonding moment.",
+                ending: "excellent"
+            },
+
+            culinary_interests: {
+                text: "Joshua lights up talking about cooking. 'I love experimenting with flavor combinations. My latest obsession is trying to perfect green chile mac and cheese.' His passion for food preparation and willingness to share his cooking interests suggests future date possibilities and shared domestic adventures.",
+                ending: "good"
+            },
+
+            boundary_respect: {
+                text: "Joshua's expression softens with genuine appreciation. 'You know, a lot of people would have gotten annoyed or tried to convince me I was being silly. The fact that you just... respected it without making it a big deal?' He pauses, cutting another piece of steak. 'That tells me a lot about who you are as a person.' The mutual respect builds a solid foundation.",
+                ending: "excellent"
+            },
+
+            food_adventure_planning: {
+                text: "The conversation naturally flows to discussing food adventures - hole-in-the-wall restaurants, food trucks, and cooking challenges. Joshua's eyes light up as he describes his quest to find the perfect green chile burger. 'I know all the best hidden spots in town. Want to do a food tour sometime?' The shared interest in culinary exploration suggests great future date potential.",
+                ending: "excellent"
+            },
+
+            boundary_violation: {
+                text: "Joshua's expression shifts to disappointment and mild irritation. 'I literally just told you I have an aversion to it, and your response is that I should get over it?' He shakes his head. 'Look, I set a pretty simple boundary here, and if you're not going to respect that on a first date, what does that say about how you'd handle disagreements in a relationship?' The date ends awkwardly.",
+                ending: "bad"
+            },
+
+            joshua_chooses: {
+                text: "Joshua thinks for a moment, then his face lights up. 'There's this hole-in-the-wall burger joint called Chuck's that makes the most incredible green chile burgers. Plus, they have original '80s arcade cabinets in the back - it's like two dates in one!' His enthusiasm is infectious. When you arrive, he's clearly a regular; the staff knows him by name.",
+                choices: [
+                    { text: "Ask what other local gems he's discovered", next: "local_expert" },
+                    { text: "Challenge him to the arcade games after burgers", next: "burger_arcade_combo" },
+                    { text: "Order the exact same thing he does", next: "trust_his_judgment" },
+                    { text: "Focus on getting to know the 'regular customer' side of him", next: "regular_customer_insight" }
+                ]
+            },
+
+            local_expert: {
+                text: "Joshua becomes an enthusiastic tour guide, describing his favorite coffee shop, the best hiking trails, and a quirky bookstore that hosts poetry nights. 'I love finding hidden gems,' he says. 'There's so much cool stuff in this town if you know where to look.' His local knowledge and willingness to share his discoveries suggests he'd be a great long-term companion for exploring together.",
+                ending: "excellent"
+            },
+
+            burger_arcade_combo: {
+                text: "The combination of amazing food and classic arcade games creates the perfect casual date atmosphere. Joshua is in his element, sharing stories about each game while you both work on the best burgers you've ever had. 'This is my ideal evening,' he says contentedly. 'Good food, good games, good company.' His appreciation for simple pleasures is endearing.",
+                ending: "excellent"
+            },
+
+            trust_his_judgment: {
+                text: "Joshua seems pleased that you're willing to trust his recommendation. 'Two green chile burgers coming up!' The food is actually amazing, and the conversation is pleasant, but you find yourself mostly following his lead rather than creating your own dynamic. The date is enjoyable but feels a bit one-sided.",
+                ending: "neutral"
+            },
+
+            regular_customer_insight: {
+                text: "Watching Joshua interact with the staff gives you insight into his character. He remembers their names, asks about their families, and tips generously. 'Joshua's one of our favorites,' the waitress tells you. 'Always brightens our day.' Seeing how he treats service workers tells you a lot about his values and character.",
+                ending: "good"
+            },
+
+            cooking_date: {
+                text: "Joshua pauses, considering the suggestion with a thoughtful expression. 'Cooking together on a first date? That's... actually kind of brilliant. You get to see how someone handles chaos, collaboration, and sharp knives all at once.' He grins. 'I'm totally in, but fair warning - I optimize everything. My spice rack is alphabetized, I have strong opinions about knife maintenance, and I may reorganize your kitchen while we cook.'",
+                choices: [
+                    { text: "Let him take the lead - you want to see his optimization in action", next: "joshua_kitchen_takeover" },
+                    { text: "Insist on cooking together as equals", next: "collaborative_cooking" },
+                    { text: "Admit you're a terrible cook and need his guidance", next: "cooking_student" },
+                    { text: "Make it a friendly competition - best dish wins", next: "cooking_competition" }
+                ]
+            },
+
+            joshua_kitchen_takeover: {
+                text: "Watching Joshua work in your kitchen is like seeing a master chef in action. He efficiently organizes ingredients, sets up mise en place, and explains his process as he goes. 'Efficiency is key, but so is enjoying the process,' he says while perfectly dicing onions. His competence is impressive, and he's clearly in his element. The meal turns out incredible.",
+                ending: "excellent"
+            },
+
+            collaborative_cooking: {
+                text: "Working together in the kitchen reveals great compatibility. Joshua suggests improvements to your technique while respecting your methods. You find a natural rhythm - he handles prep while you manage the stove, and you both contribute ideas to the developing dish. 'We make a good team,' he observes with satisfaction.",
+                ending: "excellent"
+            },
+
+            cooking_student: {
+                text: "Joshua becomes an enthusiastic teacher, patiently showing you knife skills, explaining flavor combinations, and guiding you through techniques. 'Cooking is just chemistry you can eat,' he says while teaching you to properly season a pan. His patience and encouragement make learning fun rather than intimidating.",
+                ending: "good"
+            },
+
+            cooking_competition: {
+                text: "The friendly competition brings out both your creative sides. Joshua makes an elaborate pasta dish while you focus on a perfectly executed simple meal. 'This is like Iron Chef: First Date Edition,' he jokes while plating his creation. The playful competition and mutual respect for each other's approaches creates great chemistry.",
+                ending: "excellent"
+            },
+
+            // ENDINGS
+            perfect_connection: {
+                text: "Joshua's grin could light up the entire karaoke bar. 'Are you kidding? This IS the best first date ever! I mean, how many people would commit to full Bonnie Tyler with a complete stranger?' He's practically glowing with excitement. 'You know what? I was nervous about tonight, wondering if I'd be too weird or too much, but you just... you get it. You get ME.' As you're leaving, he's still humming and doing little air guitar moves.",
+                ending: "excellent"
+            },
+
+            relationship_planning: {
+                text: "Joshua's eyes light up with genuine excitement. 'A weekly tradition? Yes! We could have themes - '80s villain songs, Disney ballads but make them metal, Christmas carols in July!' He's already pulling out his phone to create a shared calendar. The night ends with you both planning increasingly ridiculous karaoke themes while walking to your cars.",
+                ending: "excellent"
+            },
+
+            appreciation_moment: {
+                text: "You break character completely, doubling over with laughter. 'You are absolutely ridiculous in the best way possible!' Joshua drops the Kermit voice and grins. 'I have to warn you, this is pretty much my default setting. Hope you're okay with dating someone who does Muppet impressions on the regular.' The rest of the evening is fun, but you're not sure about long-term compatibility.",
+                ending: "neutral"
+            },
+
+            escalation_continues: {
+                text: "You suggest 'I Want to Know What Love Is' by Foreigner, and Joshua is game for it, but midway through, you realize you've both crossed from 'fun ridiculous' into 'actually ridiculous.' The energy is too much, too forced, and you're both trying too hard to top the previous performance. The magic is lost in the competitive escalation.",
+                ending: "bad"
+            }
+        };
+
+        let currentScene = 'start';
+
+        function displayScene(sceneKey) {
+            console.log("Displaying scene:", sceneKey);
+            
+            const scene = gameStory[sceneKey];
+            if (!scene) {
+                console.error("Scene not found:", sceneKey);
+                return;
+            }
+            
+            const storyDiv = document.getElementById('story');
+            const choicesDiv = document.getElementById('choices');
+            const restartBtn = document.getElementById('restart');
+            
+            if (!storyDiv || !choicesDiv) {
+                console.error("Required elements not found");
+                return;
+            }
+            
+            storyDiv.textContent = scene.text;
+            choicesDiv.innerHTML = '';
+            
+            if (scene.ending) {
+                const endingDiv = document.createElement('div');
+                endingDiv.className = `ending ${scene.ending}-ending`;
+                
+                let endingText = '';
+                if (scene.ending === 'excellent') {
+                    endingText = '✨ AMAZING! You and Joshua are absolutely perfect together! This is definitely turning into something special!';
+                } else if (scene.ending === 'good') {
+                    endingText = '💫 Great job! You and Joshua really hit it off. Looks like there\'s definitely a second date in your future!';
+                } else if (scene.ending === 'neutral') {
+                    endingText = '😊 The date was pleasant enough, but the spark might not be there. Sometimes that\'s how it goes!';
+                } else {
+                    endingText = '😬 Well, that didn\'t go as planned. Better luck next time!';
+                }
+                
+                endingDiv.textContent = endingText;
+                choicesDiv.appendChild(endingDiv);
+                restartBtn.classList.remove('hidden');
+            } else if (scene.choices) {
+                scene.choices.forEach((choice, index) => {
+                    const button = document.createElement('button');
+                    button.className = 'choice-btn';
+                    button.textContent = choice.text;
+                    button.onclick = function() {
+                        console.log("Choice clicked:", choice.next);
+                        displayScene(choice.next);
+                    };
+                    choicesDiv.appendChild(button);
+                });
+            }
+        }
+
+        function startGame() {
+            console.log("Starting game...");
+            currentScene = 'start';
+            const restartBtn = document.getElementById('restart');
+            if (restartBtn) {
+                restartBtn.classList.add('hidden');
+            }
+            displayScene(currentScene);
+        }
+
+        // Wait for DOM to be ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', startGame);
+        } else {
+            startGame();
+        }
+        
+        console.log("JavaScript loaded successfully");
+    </script>
+</body>
+</html>
