@@ -138,6 +138,82 @@
             color: rgba(255, 255, 255, 0.6);
             border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
+        
+        .konami-reward {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: konamiFadeIn 0.5s ease-in;
+        }
+        
+        @keyframes konamiFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .konami-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: 3px solid #ff00ff;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            box-shadow: 0 0 50px #ff00ff88;
+            animation: konamiPulse 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes konamiPulse {
+            from { box-shadow: 0 0 50px #ff00ff88; }
+            to { box-shadow: 0 0 80px #ff00ffaa; }
+        }
+        
+        .konami-title {
+            font-size: 2.5em;
+            color: #ffff00;
+            text-shadow: 0 0 20px #ffff00;
+            margin-bottom: 20px;
+            animation: konamiGlow 1s ease-in-out infinite alternate;
+        }
+        
+        @keyframes konamiGlow {
+            from { text-shadow: 0 0 20px #ffff00; }
+            to { text-shadow: 0 0 30px #ffff00, 0 0 40px #ffff00; }
+        }
+        
+        .konami-message {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            color: #00ffff;
+        }
+        
+        .konami-btn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            color: white;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .konami-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 10px 25px rgba(245, 87, 108, 0.5);
+        }
+        
+        .konami-close {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
     </style>
 </head>
 <body>
@@ -812,6 +888,94 @@
             }
             displayScene(currentScene);
         }
+
+        // Konami Code Easter Egg
+        const konamiCode = [
+            'ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown',
+            'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight',
+            'KeyB', 'KeyA'
+        ];
+        let konamiProgress = 0;
+        
+        function playKonamiSound() {
+            // Create audio context for the classic Konami Code sound
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const duration = 0.8;
+            
+            // Play a series of beeps that sound like the classic power-up sound
+            const frequencies = [523, 659, 784, 1047]; // C5, E5, G5, C6
+            
+            frequencies.forEach((freq, index) => {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(freq, audioContext.currentTime + index * 0.15);
+                oscillator.type = 'square';
+                
+                gainNode.gain.setValueAtTime(0, audioContext.currentTime + index * 0.15);
+                gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + index * 0.15 + 0.01);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + index * 0.15 + 0.2);
+                
+                oscillator.start(audioContext.currentTime + index * 0.15);
+                oscillator.stop(audioContext.currentTime + index * 0.15 + 0.2);
+            });
+        }
+        
+        function showKonamiReward() {
+            // Create the reward overlay
+            const rewardDiv = document.createElement('div');
+            rewardDiv.className = 'konami-reward';
+            rewardDiv.innerHTML = `
+                <div class="konami-content">
+                    <div class="konami-title">🎮 KONAMI CODE! 🎮</div>
+                    <div class="konami-message">
+                        You've unlocked a secret reward!<br>
+                        True retro gaming legend detected! 👑
+                    </div>
+                    <button class="konami-btn" onclick="openYouTubeReward()">
+                        🎵 Claim Your Musical Reward 🎵
+                    </button>
+                    <button class="konami-btn konami-close" onclick="closeKonamiReward()">
+                        Continue Dating Adventure
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(rewardDiv);
+        }
+        
+        function openYouTubeReward() {
+            window.open('https://youtu.be/dQw4w9WgXcQ?feature=shared', '_blank');
+        }
+        
+        function closeKonamiReward() {
+            const rewardDiv = document.querySelector('.konami-reward');
+            if (rewardDiv) {
+                rewardDiv.remove();
+            }
+        }
+        
+        document.addEventListener('keydown', function(event) {
+            // Check if the pressed key matches the next key in the sequence
+            if (event.code === konamiCode[konamiProgress]) {
+                konamiProgress++;
+                console.log(`Konami progress: ${konamiProgress}/${konamiCode.length}`);
+                
+                // If the entire sequence is completed
+                if (konamiProgress === konamiCode.length) {
+                    console.log("Konami Code activated!");
+                    playKonamiSound();
+                    showKonamiReward();
+                    konamiProgress = 0; // Reset for next time
+                }
+            } else {
+                // Reset if wrong key is pressed
+                konamiProgress = 0;
+            }
+        });
 
         // Wait for DOM to be ready
         if (document.readyState === 'loading') {
